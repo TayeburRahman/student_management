@@ -6,8 +6,7 @@ let bcrypt = require("bcryptjs");
 
 //  response  
 const createAdmin = async (req, res ) => {  
-
-  console.log('data',req.body.email)
+ 
     try { 
       const newUser = req.body   
       const ExistingUser = await userModels.findOne({
@@ -15,10 +14,10 @@ const createAdmin = async (req, res ) => {
       }); 
  
     if (ExistingUser) {
-      return res.json({ message:`${req.body.email} Admin(email) already exists` });
+      return res.json({ status: "error" , message:`${req.body.email} Admin(email) already exists` });
     }
  
-     const user = await userModels.create(newUser)
+     const user = await userModels.create(newUser) 
      console.log(user);
      
      return res.status(200).json({
@@ -26,7 +25,7 @@ const createAdmin = async (req, res ) => {
       status: "success",
       message:'User register success'});
    } catch (error) {
-     return res.status(500).json({message: error})
+     return res.status(500).json({status: "error", message: error})
    }
 }
 
@@ -91,7 +90,7 @@ const createAdmin = async (req, res ) => {
           message:"User Login Successful"
       }) 
       } catch (error) {
-        return res.status(401).json({massages: error.massages})
+        return res.status(401).json({status: "error" , message: error.massages})
       }
   }
 
@@ -105,7 +104,7 @@ const createAdmin = async (req, res ) => {
 
       return res.status(201).send(user) 
      } catch (error) {
-      return res.status(401).json({massages: error.massages})
+      return res.status(401).json({status: "error", message: error.massages})
     }
 }
  

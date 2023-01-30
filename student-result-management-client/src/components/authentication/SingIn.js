@@ -1,5 +1,8 @@
 import SchoolIcon from '@mui/icons-material/School';
-import { Fragment, useState } from 'react';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Alert, AlertTitle, Button, Typography } from '@mui/material';
+import { Fragment, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLoginUserMutation } from '../../features/auth/authApi';
@@ -7,6 +10,8 @@ import { useLoginUserMutation } from '../../features/auth/authApi';
  
 
 const SignIn = () => {
+    const [passwordStatus, setPasswordStatus] = useState(false) 
+    const [error, setError] = useState('')   
     const [select, setSelect] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -16,10 +21,34 @@ const SignIn = () => {
         formState: { errors },
     } = useForm();
 
-    const [loginUser, {data: rqsData, isError }]= useLoginUserMutation();
-    // let { from } = location.state || { from: { pathname: '/' } };
-    console.log(rqsData)
-    const onSubmit = async (data) => {await loginUser(data);};
+    const [loginUser, {data: userData, error: responseError, isError }]= useLoginUserMutation();
+    
+    console.log(responseError?.data?.message)
+
+
+
+    useEffect(() => { 
+        if(responseError?.data?.status === "error"){     
+            setError(responseError?.data?.message)
+           }  
+       
+        if(userData?.status === 'success'){
+         alert( 'Login Success')
+         navigate('/');
+       }
+      }, userData , error);
+
+
+
+
+    const onSubmit = async (data) => {
+        await loginUser(data);
+        setError()
+    };
+
+    const handelOnPassword = () => {
+        setPasswordStatus(passwordStatus === false? true : false)
+      }
  
     return (
         <Fragment>
@@ -106,7 +135,7 @@ const SignIn = () => {
                                             </label>
                                             <div className="input-group input-group-merge">
                                                 <input
-                                                    type="password"
+                                                  type={passwordStatus? "text": "password"}
                                                     id="password"
                                                     className="form-control"
                                                     placeholder="Enter your password"
@@ -117,10 +146,9 @@ const SignIn = () => {
                                                     })}
                                                 />
                                                 <div
-                                                    className="input-group-text"
-                                                    data-password="false"
+                                                    className="input-group-text p-0" 
                                                 >
-                                                    <span className="password-eye"></span>
+                                                   <Button onClick={handelOnPassword}><span className="password-eye">{passwordStatus ? <VisibilityOffIcon className='OnPassword'/> : <VisibilityIcon className='OnPassword' />}</span></Button>
                                                 </div>
                                             </div>
                                             {errors.password && (
@@ -179,6 +207,18 @@ const SignIn = () => {
                                     </p>
                                 </div>
                             </div>
+
+                            {
+                                error && (
+                                    <Alert severity="error">
+                                      <AlertTitle> 
+                                        <Typography pt={0.50} variant="body2" gutterBottom>
+                                        <strong>Check</strong> - {error? error:''} 
+                                        </Typography>
+                                      </AlertTitle> 
+                                    </Alert>
+                                )
+                            }
                         </div>
                     </div>
                 </div>

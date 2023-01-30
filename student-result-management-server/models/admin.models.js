@@ -29,7 +29,7 @@ const adminModel = new mongoose.Schema(
                             minNumbers:1,
                             minUppercase:1
                         }),
-                        message: "Password {VALUE} is not strong enough", 
+                        message: "Password is not strong enough, Follow This - [ MinLength:6, MinNumbers:1, MinUppercase:1 ]", 
                 },
             },
             confirmPassword:{

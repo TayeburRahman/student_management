@@ -14,18 +14,35 @@ import ManageSubject from './components/dashboard/ManageSubject';
 import ManageSubjectCombination from './components/dashboard/ManageSubjectCombination';
 import Paperbase from './components/dashboard/Paperbase';
 import StudentsAdmission from './components/dashboard/StudentsAdmission';
+import useAuthCheck from './hooks/useAuthCheck';
+import PrivateRoute from './PrivateRoute/PrivateRoute';
 
 function App() {
-  return (
+
+  const authChecked = useAuthCheck();
+
+  return ! authChecked ?(
+    <div> Checking Authentication </div>
+  ):(
     <div className="App">
        <Routes>
             <Route path="/login" element={<SignIn/>}/>
             <Route path="/signUp" element={<SignUp/>}/>  
              <Route path="/" element={<Paperbase/>}/> 
-             <Route path="dashboard" element={<Paperbase/>}> 
-               <Route path='' element={<DashboardMain/>} />  
+             
+             <Route path="dashboard" element={  
+                <PrivateRoute>
+                   <Paperbase/>  
+                </PrivateRoute>}> 
+               <Route path='' element={ 
+                <PrivateRoute> 
+                   <DashboardMain/> 
+                </PrivateRoute> } />  
                <Route path='authentication' element={<Content/>} />  
-               <Route path='admission' element={<StudentsAdmission/>} /> 
+               <Route path='admission' element={
+               <PrivateRoute> 
+                 <StudentsAdmission/> 
+                </PrivateRoute> } /> 
                <Route path='manage_students' element={<ManageStudents/>} /> 
                <Route path='create_subject' element={<CreateSubject/>} /> 
                <Route path='manage_subject' element={<ManageSubject/>} /> 
@@ -34,7 +51,7 @@ function App() {
                <Route path='add_result' element={<AddResult/>} /> 
                <Route path='manage_result' element={<ManageResult/>} /> 
                <Route path='database' element={<Database />} />  
-             </Route>
+             </Route> 
         </Routes>
     </div>
   );

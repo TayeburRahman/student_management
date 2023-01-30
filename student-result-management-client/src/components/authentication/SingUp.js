@@ -1,22 +1,31 @@
 import SchoolIcon from '@mui/icons-material/School';
-import { Fragment, useState } from 'react';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Alert, AlertTitle, Button } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import { Fragment, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRegistrationMutation } from '../../features/auth/authApi';
+import './auth.css';
+
 
 const SignUp = () => { 
+    const [passwordStatus, setPasswordStatus] = useState(false)  
+    const [rePasswordStatus, setRePasswordStatus] = useState(false)  
+
     const navigate = useNavigate();
     const [isCheckBox, setCheckBox] =useState(false) 
-    const [registration, {data: userData, isError }]= useRegistrationMutation();
-    console.log('user',isError)
-    console.log('data',userData)
- 
+    const [registration, {data: userData, error: responseError, isError }]= useRegistrationMutation();
+    const [error, setError] = useState('')  
+   
+
+    console.log(passwordStatus)
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm();
-
 
     const handelCheckBox =()=>{
         if(isCheckBox === false){
@@ -26,18 +35,41 @@ const SignUp = () => {
         } 
     }
 
-    const onSubmit = async (data) => { 
+    const onSubmit = async (data) => {   
+         
         if(data?.password !== data?.confirmPassword){
-
+            setError("Password No Match")
         }else{
+          setError()
           await registration(data);
-        }
-    };
+        } 
+         
+    
+    }; 
 
-    if(userData?.status === 'success'){
-        alert(`${userData?.user.email} Registration Success. Switching to Login User`)
-        navigate('/login');
-    }
+    useEffect(() => { 
+        if(userData?.status === "error"){     
+            setError(userData?.message)
+           }  
+        
+           if(responseError?.data?.message?.errors?.password?.message){
+            setError(responseError?.data?.message?.errors?.password?.message)
+           }
+
+        if(userData?.status === 'success'){
+         alert(`${userData?.user.email} Registration Success. Switching to Login User`)
+         navigate('/login');
+       }
+      }, userData , error);
+     
+
+      const handelOnPassword = () => {
+        setPasswordStatus(passwordStatus === false? true : false)
+      }
+
+      const handelOnRePassword = () => {
+        setRePasswordStatus(rePasswordStatus === false? true : false)
+      }
 
     return (
         <Fragment>
@@ -80,7 +112,7 @@ const SignUp = () => {
                                         <div className="mb-2 text-left">
                                             <label
                                                 htmlFor="displayName"
-                                                className="form-label "
+                                                className="form-label m-0"
                                             >
                                                 Full Name
                                             </label>
@@ -99,7 +131,7 @@ const SignUp = () => {
                                         <div className="mb-2 text-left">
                                             <label
                                                 htmlFor="email"
-                                                className="form-label"
+                                                className="form-label m-0"
                                             >
                                                 Email address
                                             </label>
@@ -118,13 +150,13 @@ const SignUp = () => {
                                         <div className="mb-2 text-left">
                                             <label
                                                 htmlFor="password"
-                                                className="form-label text-left"
+                                                className="form-label text-left m-0"
                                             >
                                                 Password
                                             </label>
                                             <div className="input-group input-group-merge">
                                                 <input
-                                                    type="password"
+                                                 type={passwordStatus? "text": "password"}
                                                     id="password"
                                                     className="form-control"
                                                     placeholder="Enter your password"
@@ -134,23 +166,21 @@ const SignUp = () => {
                                                     })}
                                                 />
                                                 <div
-                                                    className="input-group-text"
-                                                    data-password="false"
-                                                >
-                                                    <span className="password-eye"></span>
+                                                    className="input-group-text p-0" >
+                                                  <Button onClick={handelOnPassword}><span className="password-eye">{passwordStatus ? <VisibilityOffIcon className='OnPassword'/> : <VisibilityIcon className='OnPassword' />}</span></Button>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="mb-2 text-left">
                                             <label
                                                 htmlFor="confirmPassword"
-                                                className="form-label text-left"
+                                                className="form-label text-left m-0"
                                             >
                                               Re Password
                                             </label>
                                             <div className="input-group input-group-merge">
                                                 <input
-                                                    type="password"
+                                                    type={rePasswordStatus? "text": "password"}
                                                     id="confirmPassword"
                                                     className="form-control"
                                                     placeholder="Enter Re password"
@@ -160,10 +190,9 @@ const SignUp = () => {
                                                     })}
                                                 />
                                                 <div
-                                                    className="input-group-text"
-                                                    data-password="false"
+                                                    className="input-group-text p-0" 
                                                 >
-                                                    <span className="password-eye"></span>
+                                                     <Button onClick={handelOnRePassword}><span className="password-eye">{rePasswordStatus ? <VisibilityOffIcon className='OnPassword'/> : <VisibilityIcon className='OnPassword' />}</span></Button>
                                                 </div>
                                             </div>
                                         </div>
@@ -220,6 +249,18 @@ const SignUp = () => {
                                     </p>
                                 </div>
                             </div>
+
+                            {
+                                error && (
+                                    <Alert severity="error">
+                                      <AlertTitle> 
+                                        <Typography pt={0.50} variant="body2" gutterBottom>
+                                        <strong>Check</strong> - {error? error:''} 
+                                        </Typography>
+                                      </AlertTitle> 
+                                    </Alert>
+                                )
+                            }
                         </div>
                     </div>
                 </div>
